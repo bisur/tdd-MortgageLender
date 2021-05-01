@@ -1,5 +1,8 @@
 package com.cognizant;
 
+import java.time.LocalDateTime;
+import java.util.Date;
+
 public class Loan {
     private String loanId;
     private double dti;
@@ -7,7 +10,16 @@ public class Loan {
     private long savings;
     private long loanAmount;
     private Status loanStatus;
-    //private DateTime dateRequested ;
+
+    public Date getDateRequested() {
+        return dateRequested;
+    }
+
+    public void setDateRequested(LocalDateTime dateRequested) {
+      //  this.dateRequested = dateRequested;
+    }
+
+    private Date dateRequested ;
 
 
     public long getLoanAmount() {

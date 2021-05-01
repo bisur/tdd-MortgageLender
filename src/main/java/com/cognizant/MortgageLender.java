@@ -1,5 +1,6 @@
 package com.cognizant;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
 
 public class MortgageLender {
@@ -63,11 +64,11 @@ public class MortgageLender {
                 loan.setLoanAmount(requestedLoanAmount);
 
             }
-           //Set daterequested
+           loan.setDateRequested(LocalDateTime.now());
            loans.put(loan.getId() ,loan);
             return null;
         }
-        //Set daterequested
+        loan.setDateRequested(LocalDateTime.now());
         loans.put(loan.getId() ,loan);
         return "warning to not proceed";
 

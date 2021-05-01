@@ -5,9 +5,15 @@ import java.util.HashMap;
 public class MortgageLender {
 
     private HashMap<String,Fund> funds= new HashMap<>();
+    private long availableFundsForLoan;
 
+    public long getAvailableFundsForLoan() {
+        return availableFundsForLoan;
+    }
 
-
+    public void setAvailableFundsForLoan(long availableFundsForLoan) {
+        this.availableFundsForLoan = availableFundsForLoan;
+    }
 
     public HashMap<String,Fund> getAvailableFunds(String fundName) {
         if(funds.containsKey(fundName)) {
@@ -29,18 +35,32 @@ public class MortgageLender {
        funds.put(name,fund);
     }
 
-    public void applyForLoan(Loan loan, long requestedLoanAmount) {
+    public String applyForLoan(Loan loan, long requestedLoanAmount) {
         if (qualify(loan, requestedLoanAmount)){
-            if (loan.getQualification()==Qualification.Qualified || loan.getQualification()==Qualification.PartialQualified){
-                loan.setLoanStatus(Status.Qualified);
-                loan.setLoanAmount(requestedLoanAmount);
-            }
-            else {
-                loan.setLoanStatus(Status.Denied);
-                loan.setLoanAmount(0);
-            }
-        }
+            if(getAvailableFundsForLoan()==0){
+                if (loan.getQualification()==Qualification.Qualified || loan.getQualification()==Qualification.PartialQualified){
+                    loan.setLoanStatus(Status.Qualified);
+                    loan.setLoanAmount(requestedLoanAmount);
+                }
+                else {
+                    loan.setLoanStatus(Status.Denied);
+                    loan.setLoanAmount(0);
 
+                }
+            }
+           else {
+               if (getAvailableFundsForLoan()>=requestedLoanAmount && (loan.getQualification()==Qualification.Qualified || loan.getQualification()==Qualification.PartialQualified)){
+                    loan.setLoanStatus(Status.Approved);
+                    setAvailableFundsForLoan(getAvailableFundsForLoan()-requestedLoanAmount);
+               }else{
+                   loan.setLoanStatus(Status.OnHold);
+               }
+                loan.setLoanAmount(requestedLoanAmount);
+
+            }
+            return null;
+        }
+        return "warning to not proceed";
 
     }
 

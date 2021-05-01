@@ -82,11 +82,76 @@ private MortgageLender mortgageLender;
         //fail();
 
         Loan loan= new Loan(21,700,100000);
-
+        mortgageLender.setAvailableFundsForLoan(0);
         mortgageLender.applyForLoan(loan,250000);
         assertEquals(Qualification.Qualified,loan.getQualification());
         assertEquals(Status.Qualified,loan.getStatus());
         assertEquals(250000,loan.getLoanAmount());
 
     }
+
+    /**
+     * Given I have <available_funds> in available funds
+     * When I process a qualified loan
+     * Then the loan status is set to <status>
+     *
+     * Example:
+     * | loan_amount | available_funds |    status  |
+     * |   125,000   |    100,000      |   on hold  |
+     * |   125,000   |    200,000      |  approved  |
+     * |   125,000   |    125,000      |  approved  |
+     *
+     * When I process a not qualified loan
+     * Then I should see a warning to not proceed
+     */
+
+    @Test
+    public void checkLoanStatusWhenAvailableFunds(){
+        //fail();
+
+        Loan loan= new Loan(21,700,100000);
+
+        mortgageLender.setAvailableFundsForLoan(100000);
+
+        mortgageLender.applyForLoan(loan,125000);
+        assertEquals(Status.OnHold,loan.getStatus());
+
+        mortgageLender.setAvailableFundsForLoan(200000);
+        mortgageLender.applyForLoan(loan,125000);
+
+        assertEquals(Status.Approved,loan.getStatus(),"loan1 approved");
+        mortgageLender.setAvailableFundsForLoan(125000);
+        mortgageLender.applyForLoan(loan,125000);
+
+        assertEquals(Status.Approved,loan.getStatus(),"loan2 approved");
+
+        Loan loan2= new Loan(38,700,100000);
+        mortgageLender.setAvailableFundsForLoan(0);
+        String result= mortgageLender.applyForLoan(loan2,125000);
+
+        assertEquals("warning to not proceed",result);
+
+
+    }
+
+    /**
+     * Given I have approved a loan
+     * Then the requested loan amount is moved from available funds to pending funds
+     * And I see the available and pending funds reflect the changes accordingly
+     */@Test
+    public void checkAnApprovedLoanReviewsAvailableFunds(){
+        //fail();
+
+        Loan loan= new Loan(21,700,100000);
+        long currentAvailableFunds= 200000;
+        mortgageLender.setAvailableFundsForLoan(currentAvailableFunds);
+        mortgageLender.applyForLoan(loan,125000);
+        assertEquals(75000,mortgageLender.getAvailableFundsForLoan());
+
+
+
+
+    }
+
+
 }

@@ -3,7 +3,9 @@ package com.cognizant;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import java.time.LocalDateTime;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -208,10 +210,42 @@ private Loan loan1;
         mortgageLender.applyForLoan(loan1,125000);
 
         long availableFunds= mortgageLender.getAvailableFundsForLoan();
+        loan1.setDateRequested(LocalDateTime.now().minusDays(4));
         mortgageLender.CheckExpiredLoans();
+        assertEquals(Status.Expired,loan1.getStatus());
+        long actualAvailableFunds= mortgageLender.getAvailableFundsForLoan();
+        assertTrue((actualAvailableFunds>availableFunds));
+
+    }
+
+    /**
+     * Given there are loans in my system
+     * When I search by loan status (qualified, denied, on hold, approved, accepted, rejected, expired)
+     * Then I should see a list of loans and their details
+     */
+    @Test
+    public void checkSearchLoan(){
+        //fail();
+
+
+        mortgageLender.setAvailableFundsForLoan(125000);
+        mortgageLender.applyForLoan(loan1,125000);
+
+        long availableFunds= mortgageLender.getAvailableFundsForLoan();
+        loan1.setDateRequested(LocalDateTime.now().minusDays(4));
+
+        Map<String,Loan> search1=mortgageLender.searchLoanByStatus(Status.Approved);
+
+        assertTrue(search1.size()>0);
+        //Map.Entry<String,String> entry = map.entrySet().iterator().next();
+
+       // Loan myKey = search1.keySet().toArray()[0];
+//        mortgageLender.CheckExpiredLoans();
 //        assertEquals(Status.Expired,loan1.getStatus());
 //        long actualAvailableFunds= mortgageLender.getAvailableFundsForLoan();
 //        assertTrue((actualAvailableFunds>availableFunds));
 
+
     }
+
 }

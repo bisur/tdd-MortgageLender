@@ -11,15 +11,15 @@ public class Loan {
     private long loanAmount;
     private Status loanStatus;
 
-    public Date getDateRequested() {
+    public LocalDateTime getDateRequested() {
         return dateRequested;
     }
 
     public void setDateRequested(LocalDateTime dateRequested) {
-      //  this.dateRequested = dateRequested;
+        this.dateRequested = dateRequested;
     }
 
-    private Date dateRequested ;
+    private LocalDateTime dateRequested ;
 
 
     public long getLoanAmount() {

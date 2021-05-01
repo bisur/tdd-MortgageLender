@@ -10,11 +10,16 @@ import static org.junit.jupiter.api.Assertions.*;
 public class MortgageLenderTest {
 
 private MortgageLender mortgageLender;
+private Loan loan1;
+    private Loan loan2;
 
 
     @BeforeEach
     public void setup(){
-         mortgageLender= new MortgageLender();
+        mortgageLender= new MortgageLender();
+         loan1= new Loan("Bisrat",21,700,100000);
+         loan2= new Loan("Edgar",38,700,100000);
+
     }
     /**
      * When I check my available funds
@@ -25,7 +30,7 @@ private MortgageLender mortgageLender;
     @Test
     public void checkAvailableFundsWithNOAccountExist(){
         //fail();
-        HashMap<String,Fund> funds= mortgageLender.getAvailableFunds("Bisrat");
+        HashMap<String,Fund> funds= mortgageLender.getAvailableLoans("Bisrat");
         assertNull(funds,"account exist");
 
     }
@@ -35,7 +40,9 @@ private MortgageLender mortgageLender;
         //fail();
         Fund fund= new Fund(100000,"Bisrat");
         mortgageLender.addAccount(fund.getName(),fund);
-        HashMap<String,Fund> funds= mortgageLender.getAvailableFunds("Bisrat");
+
+        mortgageLender.addAccount(fund.getName(),fund);
+        HashMap<String,Fund> funds= mortgageLender.getAvailableLoans("Bisrat");
         assertEquals(100000,funds.get("Bisrat").getTotal());
 
     }
@@ -57,8 +64,9 @@ private MortgageLender mortgageLender;
         //fail();
         Fund fund= new Fund(100000,"Bisrat");
         mortgageLender.addAccount(fund.getName(),fund);
+
         mortgageLender.addDeposit(50000, "Bisrat");
-      HashMap<String,Fund> funds= mortgageLender.getAvailableFunds("Bisrat");
+        HashMap<String,Fund> funds= mortgageLender.getAvailableLoans("Bisrat");
         assertEquals(150000,funds.get("Bisrat").getTotal());
 
     }
@@ -81,12 +89,11 @@ private MortgageLender mortgageLender;
     public void checkApplicantQualificationForLoan(){
         //fail();
 
-        Loan loan= new Loan(21,700,100000);
         mortgageLender.setAvailableFundsForLoan(0);
-        mortgageLender.applyForLoan(loan,250000);
-        assertEquals(Qualification.Qualified,loan.getQualification());
-        assertEquals(Status.Qualified,loan.getStatus());
-        assertEquals(250000,loan.getLoanAmount());
+        mortgageLender.applyForLoan(loan1,250000);
+        assertEquals(Qualification.Qualified,loan1.getQualification());
+        assertEquals(Status.Qualified,loan1.getStatus());
+        assertEquals(250000,loan1.getLoanAmount());
 
     }
 
@@ -109,23 +116,22 @@ private MortgageLender mortgageLender;
     public void checkLoanStatusWhenAvailableFunds(){
         //fail();
 
-        Loan loan= new Loan(21,700,100000);
 
         mortgageLender.setAvailableFundsForLoan(100000);
 
-        mortgageLender.applyForLoan(loan,125000);
-        assertEquals(Status.OnHold,loan.getStatus());
+        mortgageLender.applyForLoan(loan1,125000);
+        assertEquals(Status.OnHold,loan1.getStatus());
 
         mortgageLender.setAvailableFundsForLoan(200000);
-        mortgageLender.applyForLoan(loan,125000);
+        mortgageLender.applyForLoan(loan1,125000);
 
-        assertEquals(Status.Approved,loan.getStatus(),"loan1 approved");
+        assertEquals(Status.Approved,loan1.getStatus(),"loan1 approved");
         mortgageLender.setAvailableFundsForLoan(125000);
-        mortgageLender.applyForLoan(loan,125000);
+        mortgageLender.applyForLoan(loan1,125000);
 
-        assertEquals(Status.Approved,loan.getStatus(),"loan2 approved");
+        assertEquals(Status.Approved,loan1.getStatus(),"loan2 approved");
 
-        Loan loan2= new Loan(38,700,100000);
+
         mortgageLender.setAvailableFundsForLoan(0);
         String result= mortgageLender.applyForLoan(loan2,125000);
 
@@ -138,20 +144,74 @@ private MortgageLender mortgageLender;
      * Given I have approved a loan
      * Then the requested loan amount is moved from available funds to pending funds
      * And I see the available and pending funds reflect the changes accordingly
-     */@Test
+     */
+    @Test
     public void checkAnApprovedLoanReviewsAvailableFunds(){
         //fail();
 
-        Loan loan= new Loan(21,700,100000);
+
         long currentAvailableFunds= 200000;
         mortgageLender.setAvailableFundsForLoan(currentAvailableFunds);
-        mortgageLender.applyForLoan(loan,125000);
-        assertEquals(75000,mortgageLender.getAvailableFundsForLoan());
+        mortgageLender.setPendingFundsForLoan(0);
+        mortgageLender.applyForLoan(loan1,125000);
+        long pendingFunds= mortgageLender.getPendingFundsForLoan();
+        assertEquals(125000,pendingFunds);
+        assertTrue(currentAvailableFunds>mortgageLender.getAvailableFundsForLoan());
+    }
 
+    /**
+     * Given I have an approved loan
+     * When the applicant accepts my loan offer
+     * Then the loan amount is removed from the pending funds
+     * And the loan status is marked as accepted
+     *
+     * Given I have an approved loan
+     * When the applicant rejects my loan offer
+     * Then the loan amount is moved from the pending funds back to available funds
+     * And the loan status is marked as rejected
+     */
+    @Test
+    public void checkLoanStatusAfterLoanAcceptedOrRejected(){
+        //fail();
+        mortgageLender.setAvailableFundsForLoan(125000);
+        mortgageLender.applyForLoan(loan1,125000);
+        long pendingFunds= mortgageLender.getPendingFundsForLoan();
+        mortgageLender.acceptLoanOffer(loan1);
 
+        assertEquals(Status.Accepted,loan1.getStatus(),"loan2 approved");
+        long actualPendingFunds= mortgageLender.getPendingFundsForLoan();
+        assertTrue((actualPendingFunds==pendingFunds-loan1.getLoanAmount()));
 
+        long availableFunds= mortgageLender.getAvailableFundsForLoan();
+        mortgageLender.rejectedLoanOffer(loan1);
+
+        assertEquals(Status.Rejected,loan1.getStatus(),"loan2 approved");
+        long actualAvailableFunds= mortgageLender.getAvailableFundsForLoan();
+        assertTrue((actualAvailableFunds==availableFunds+loan1.getLoanAmount()));
 
     }
 
+    /**
+     * Rule: approved loans expired in 3 days
+     *
+     * Given there is an approved loan offered more than 3 days ago
+     * When I check for expired loans
+     * Then the loan amount is move from the pending funds back to available funds
+     * And the loan status is marked as expired
+     */
+    @Test
+    public void checkIfUnDecidedLoan(){
+        //fail();
 
+
+        mortgageLender.setAvailableFundsForLoan(125000);
+        mortgageLender.applyForLoan(loan1,125000);
+
+        long availableFunds= mortgageLender.getAvailableFundsForLoan();
+        mortgageLender.CheckExpiredLoans();
+//        assertEquals(Status.Expired,loan1.getStatus());
+//        long actualAvailableFunds= mortgageLender.getAvailableFundsForLoan();
+//        assertTrue((actualAvailableFunds>availableFunds));
+
+    }
 }

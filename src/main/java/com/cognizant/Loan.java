@@ -1,11 +1,13 @@
 package com.cognizant;
 
 public class Loan {
+    private String loanId;
     private double dti;
     private long credit_score;
     private long savings;
     private long loanAmount;
     private Status loanStatus;
+    //private DateTime dateRequested ;
 
 
     public long getLoanAmount() {
@@ -41,10 +43,11 @@ public class Loan {
     }
 
 
-    public Loan(long dti, long credit_score, long savings) {
+    public Loan(String id ,long dti, long credit_score, long savings) {
         this.dti = dti;
         this.credit_score = credit_score;
         this.savings = savings;
+        this.loanId=id;
     }
 
     public double getDti() {
@@ -77,5 +80,9 @@ public class Loan {
 
     public boolean checkSavings(long requestedLoanAmount) {
         return getSavings()>=(requestedLoanAmount*0.25);
+    }
+
+    public String getId() {
+        return loanId;
     }
 }

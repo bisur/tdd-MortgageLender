@@ -5,7 +5,11 @@ import java.util.HashMap;
 public class MortgageLender {
 
     private HashMap<String,Fund> funds= new HashMap<>();
+    private HashMap<String,Loan> loans= new HashMap<>();
+
     private long availableFundsForLoan;
+    private long pendingFundsForLoan;
+
 
     public long getAvailableFundsForLoan() {
         return availableFundsForLoan;
@@ -15,7 +19,7 @@ public class MortgageLender {
         this.availableFundsForLoan = availableFundsForLoan;
     }
 
-    public HashMap<String,Fund> getAvailableFunds(String fundName) {
+    public HashMap<String,Fund> getAvailableLoans(String fundName) {
         if(funds.containsKey(fundName)) {
             return funds;
         }
@@ -51,15 +55,20 @@ public class MortgageLender {
            else {
                if (getAvailableFundsForLoan()>=requestedLoanAmount && (loan.getQualification()==Qualification.Qualified || loan.getQualification()==Qualification.PartialQualified)){
                     loan.setLoanStatus(Status.Approved);
-                    setAvailableFundsForLoan(getAvailableFundsForLoan()-requestedLoanAmount);
+                    setPendingFundsForLoan(requestedLoanAmount);
+
                }else{
                    loan.setLoanStatus(Status.OnHold);
                }
                 loan.setLoanAmount(requestedLoanAmount);
 
             }
+           //Set daterequested
+           loans.put(loan.getId() ,loan);
             return null;
         }
+        //Set daterequested
+        loans.put(loan.getId() ,loan);
         return "warning to not proceed";
 
     }
@@ -79,5 +88,36 @@ public class MortgageLender {
             loan.setQualification(Qualification.notQualified);
             return false;
         }
+    }
+
+    public void setPendingFundsForLoan(long pendingFundsForLoan) {
+        if (this.pendingFundsForLoan>0){
+            this.pendingFundsForLoan += pendingFundsForLoan;
+
+        }
+        else {
+            this.pendingFundsForLoan = pendingFundsForLoan;
+        }
+        setAvailableFundsForLoan(getAvailableFundsForLoan()-pendingFundsForLoan);
+
+    }
+
+    public long getPendingFundsForLoan() {
+        return pendingFundsForLoan;
+    }
+
+    public void acceptLoanOffer(Loan loan) {
+        this.pendingFundsForLoan -= loan.getLoanAmount();
+        loan.setLoanStatus(Status.Accepted);
+    }
+
+    public void rejectedLoanOffer(Loan loan) {
+        this.pendingFundsForLoan -= loan.getLoanAmount();
+        this.availableFundsForLoan += loan.getLoanAmount();
+        loan.setLoanStatus(Status.Rejected);
+    }
+
+    public void CheckExpiredLoans() {
+        //Swap loans and set expired date
     }
 }

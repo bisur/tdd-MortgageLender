@@ -4,5 +4,5 @@ public enum Status {
    Qualified,
    Denied,
    OnHold,
-    Approved
+    Accepted, Rejected, Expired, Approved
 }

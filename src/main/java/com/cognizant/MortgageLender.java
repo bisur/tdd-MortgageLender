@@ -23,19 +23,17 @@ public class MortgageLender {
         this.availableFundsForLoan = availableFundsForLoan;
     }
 
-    public HashMap<String,Fund> getAvailableLoans(String fundName) {
-        if(funds.containsKey(fundName)) {
-            return funds;
+    public HashMap<String,Loan> getAvailableLoans(String fundName) {
+        if(loans.containsKey(fundName)) {
+            return loans;
         }
         else {
             return null;
         }
     }
 
-    public void addDeposit(long deposit_amount, String fundName ) {
-        if(funds.containsKey(fundName)) {
-            funds.get(fundName).addDeposit(deposit_amount);
-        }
+    public void addDeposit(long deposit_amount ) {
+        this.availableFundsForLoan+=deposit_amount;
     }
 
 
@@ -130,7 +128,7 @@ public class MortgageLender {
             if( isAfter){
                 loans.get(loan.getId()).setLoanStatus(Status.Expired);
                 returnPendingFund(loan.getLoanAmount());
-            };
+            }
             it.remove(); // avoids a ConcurrentModificationException
         }
 
@@ -141,13 +139,12 @@ public class MortgageLender {
         this.availableFundsForLoan+=loanAmount;
     }
 
-    public Map<String,Loan>  searchLoanByStatus(Status approved) {
+    public Map<String,Loan>  searchLoanByStatus(Status currentStatus) {
 
-        Map<String,Loan> result = loans.entrySet()
+      return loans.entrySet()
                 .stream()
-                .filter(map -> ((Loan)map.getValue()).getLoanStatus() == approved)
+                .filter(map -> (map.getValue()).getLoanStatus() == currentStatus)
                 .collect(Collectors.toMap(map -> map.getKey(), map -> map.getValue()));
 
-        return result;
     }
 }

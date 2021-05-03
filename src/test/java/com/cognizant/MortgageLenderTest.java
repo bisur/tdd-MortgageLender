@@ -32,22 +32,12 @@ private Loan loan1;
     @Test
     public void checkAvailableFundsWithNOAccountExist(){
         //fail();
-        HashMap<String,Fund> funds= mortgageLender.getAvailableLoans("Bisrat");
-        assertNull(funds,"account exist");
+
+        assertEquals(0,mortgageLender.getAvailableFundsForLoan());
 
     }
 
-    @Test
-    public void checkAvailableFundsWhenAccountExists(){
-        //fail();
-        Fund fund= new Fund(100000,"Bisrat");
-        mortgageLender.addAccount(fund.getName(),fund);
 
-        mortgageLender.addAccount(fund.getName(),fund);
-        HashMap<String,Fund> funds= mortgageLender.getAvailableLoans("Bisrat");
-        assertEquals(100000,funds.get("Bisrat").getTotal());
-
-    }
 
 
     /**
@@ -64,12 +54,9 @@ private Loan loan1;
     @Test
     public void checkAvailableFundDetails(){
         //fail();
-        Fund fund= new Fund(100000,"Bisrat");
-        mortgageLender.addAccount(fund.getName(),fund);
-
-        mortgageLender.addDeposit(50000, "Bisrat");
-        HashMap<String,Fund> funds= mortgageLender.getAvailableLoans("Bisrat");
-        assertEquals(150000,funds.get("Bisrat").getTotal());
+        mortgageLender.setAvailableFundsForLoan(100000);
+        mortgageLender.addDeposit(50000);
+        assertEquals(150000,mortgageLender.getAvailableFundsForLoan());
 
     }
     /**
@@ -237,13 +224,11 @@ private Loan loan1;
         Map<String,Loan> search1=mortgageLender.searchLoanByStatus(Status.Approved);
 
         assertTrue(search1.size()>0);
-        //Map.Entry<String,String> entry = map.entrySet().iterator().next();
-
-       // Loan myKey = search1.keySet().toArray()[0];
+//        loan1.setDateRequested(LocalDateTime.now().minusDays(4));
 //        mortgageLender.CheckExpiredLoans();
-//        assertEquals(Status.Expired,loan1.getStatus());
-//        long actualAvailableFunds= mortgageLender.getAvailableFundsForLoan();
-//        assertTrue((actualAvailableFunds>availableFunds));
+//
+//        Map<String,Loan> search2=mortgageLender.searchLoanByStatus(Status.Expired);
+//        assertTrue(search2.size()>0);
 
 
     }
